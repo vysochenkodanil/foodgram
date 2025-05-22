@@ -38,6 +38,12 @@ class Recipe(models.Model):
         Tag,
         related_name='recipes'
     )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации',
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.name
