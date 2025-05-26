@@ -3,6 +3,7 @@ import uuid
 
 from django.core.files.base import ContentFile
 from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer
 
 from .models import CustomUser
 
@@ -33,3 +34,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if request and not request.user.is_anonymous:
             return request.user.follower.filter(author=obj).exists()
         return False
+
+
+class CustomUserCreateSerializer(UserCreateSerializer):
+    logo = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'id', 'email', 'username',
+            'first_name', 'last_name',
+            'password', 'logo',
+        )
