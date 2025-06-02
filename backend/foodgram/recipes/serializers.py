@@ -57,25 +57,23 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'name', 'image', 'text', 'cooking_time'
         )
 
-def get_is_favorited(self, obj):
-    request = self.context.get('request')
-    if request is None or request.user.is_anonymous:
-        return False
-    return Favorite.objects.filter(user=request.user, recipe=obj).exists()
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return Favorite.objects.filter(user=request.user, recipe=obj).exists()
 
-def get_is_in_shopping_cart(self, obj):
-    request = self.context.get('request')
-    if request is None or request.user.is_anonymous:
-        return False
-    return ShoppingCart.objects.filter(user=request.user, recipe=obj).exists()
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(user=request.user, recipe=obj).exists()
 
 
 class Base64ImageField(serializers.ImageField): #Кастомный сериализатор для поля с картинками
     
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
-            # Пример строки:
-            # data:image/png;base64,iVBORw0KGgoAAAANS...
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
             file_name = f'{uuid.uuid4()}.{ext}'

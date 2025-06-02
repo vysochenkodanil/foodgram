@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'User.apps.UserConfig', # перенес это вперед, пока что
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,9 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'djoser',
     'Api.apps.ApiConfig',
-    'User.apps.UserConfig',
     'recipes.apps.RecipesConfig',
 ]
 
@@ -82,6 +83,15 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 6,  # Показ по 6 рецептов на странице
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter'
+    ],
 }
 
 
@@ -92,16 +102,18 @@ SIMPLE_JWT = {
 }
 
 DJOSER = {
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user': ['rest_framework.permissions.AllowAny'],
+    },
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE': True,
-    'USERNAME_FIELD': 'username',
     'SERIALIZERS': {
         'user_create': 'User.serializers.CustomUserCreateSerializer',
         'user': 'User.serializers.CustomUserSerializer',
         'current_user': 'User.serializers.CustomUserSerializer',
     }
 }
-
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
