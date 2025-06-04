@@ -6,6 +6,7 @@ from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer
 
 from .models import CustomUser
+from recipes.models import Subscription
 
 
 class Base64ImageField(serializers.ImageField):
@@ -20,29 +21,31 @@ class Base64ImageField(serializers.ImageField):
 
 class CustomUserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
-    logo = Base64ImageField(required=False, allow_null=True)
+    avatar = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = CustomUser
         fields = (
             'id', 'email', 'username', 'first_name',
-            'last_name', 'logo', 'is_subscribed',
+            'last_name', 'avatar', 'is_subscribed',
         )
-
+    
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if request and not request.user.is_anonymous:
-            return request.user.follower.filter(author=obj).exists()
-        return False
+        if request is None or request.user.is_anonymous:
+            return False
+        return Subscription.objects.filter(user=request.user, author=obj).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    logo = Base64ImageField(required=False, allow_null=True)
+    
+    first_name = serializers.CharField(required=True, max_length=150)
+    last_name = serializers.CharField(required=True, max_length=150)
 
     class Meta:
         model = CustomUser
         fields = (
             'id', 'email', 'username',
             'first_name', 'last_name',
-            'password', 'logo',
+            'password',
         )

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from User.models import CustomUser
 User = get_user_model()
 
 class Tag(models.Model):
@@ -79,18 +79,12 @@ class IngredientInRecipe(models.Model):
         unique_together = ('recipe', 'ingredient')
     
 
-
-
 class Subscription(models.Model):
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='subscriptions'
+        CustomUser, related_name='subscriptions', on_delete=models.CASCADE
     )
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='subscribers'
+        CustomUser, related_name='followers', on_delete=models.CASCADE
     )
 
     class Meta:

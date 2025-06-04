@@ -9,9 +9,9 @@ class CustomUser(AbstractUser):
         blank=False,
         null=False,
     )
-    logo = models.ImageField(
-        upload_to='images/logo',
-        verbose_name='Лого',
+    avatar = models.ImageField(
+        upload_to='images/avatar',
+        verbose_name='Аватар',
         null=True,
         blank=True
     )
