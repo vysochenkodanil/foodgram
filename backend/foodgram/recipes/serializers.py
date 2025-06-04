@@ -11,7 +11,7 @@ from recipes.models import Tag, Ingredient, IngredientInRecipe, Favorite, Recipe
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'color', 'slug')
+        fields = ('id', 'name', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -92,7 +92,7 @@ class WriteIngredientInRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
-    ingredients = WriteIngredientInRecipeSerializer(many=True)
+    ingredients = WriteIngredientInRecipeSerializer(many=True, write_only=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
     image = Base64ImageField()
 
@@ -124,7 +124,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             objs.append(
                 IngredientInRecipe(
                     recipe=recipe,
-                    ingredient=item['id'],
+                    ingredient=Ingredient.objects.get(id=item['id']),
                     amount=item['amount']
                 )
             )

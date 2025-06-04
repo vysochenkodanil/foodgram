@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, mixins
-from .models import Recipe
+from .models import Recipe, Tag, Ingredient
 from User.models import CustomUser
-from .serializers import RecipeReadSerializer, RecipeWriteSerializer, ShoppingCartSerializer, FavoriteSerializer, FollowSerializer
+from .serializers import RecipeReadSerializer, RecipeWriteSerializer, ShoppingCartSerializer, FavoriteSerializer, FollowSerializer, TagSerializer, IngredientSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +10,7 @@ from rest_framework import permissions
 from Api.permissions import IsAuthorOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
+from Api.filters import RecipeFilter, IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -17,13 +18,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     search_fields = ('^name','name')
-    filterset_fields = ['tags', 'author']
-
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return RecipeReadSerializer
-        return RecipeWriteSerializer
+        if self.action in ['create', 'update', 'partial_update']:
+            return RecipeWriteSerializer
+        return RecipeReadSerializer
+    
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        read_serializer = RecipeReadSerializer(
+            serializer.instance,
+            context=self.get_serializer_context()
+        )
+        return Response(read_serializer.data, status=status.HTTP_201_CREATED)
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def favorite(self, request, pk=None):
@@ -88,6 +101,20 @@ class FavoriteViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return Recipe.objects.filter(favorited_by__user=self.request.user)
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientFilter
 
 
 class ShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
