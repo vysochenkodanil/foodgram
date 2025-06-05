@@ -11,7 +11,9 @@ from Api.permissions import IsAuthorOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from Api.filters import RecipeFilter, IngredientFilter
-
+from .utils.base62 import encode_base62, decode_base62
+from django.shortcuts import get_object_or_404, redirect
+ 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-pub_date')
@@ -37,6 +39,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             context=self.get_serializer_context()
         )
         return Response(read_serializer.data, status=status.HTTP_201_CREATED)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        read_serializer = RecipeReadSerializer(instance, context=self.get_serializer_context())
+        return Response(read_serializer.data)
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def favorite(self, request, pk=None):
@@ -94,6 +105,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    @action(detail=True, methods=['get'], url_path='get-link')
+    def get_link(self, request, pk=None):
+        recipe = self.get_object()
+        short_code = encode_base62(recipe.id)
+        short_link = f"http://short.link/{short_code}"
+        return Response({"short-link": short_link})
+
+
+def redirect_to_recipe(request, short_code):
+    recipe_id = decode_base62(short_code)
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    return redirect(f'/recipes/{recipe.id}/')
 
 class FavoriteViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = FavoriteSerializer

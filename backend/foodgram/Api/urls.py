@@ -1,5 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
+from recipes import views
 
 from recipes.views import (
     RecipeViewSet,
@@ -26,4 +27,5 @@ urlpatterns = [
         DownloadShoppingCartView.as_view(),
         name='download_shopping_cart'
     ),
+    path('r/<str:short_code>/', views.redirect_to_recipe, name='redirect_to_recipe'),
 ]
