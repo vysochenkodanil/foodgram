@@ -10,10 +10,11 @@ class CustomUser(AbstractUser):
         null=False,
     )
     avatar = models.ImageField(
-        upload_to='images/avatar',
+        upload_to='images/avatar/%Y/%m/%d',
         verbose_name='Аватар',
         null=True,
-        blank=True
+        blank=True,
+        max_length=255
     )
 
     USERNAME_FIELD = 'email'

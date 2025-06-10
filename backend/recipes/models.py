@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from User.models import CustomUser
+from user.models import CustomUser 
 User = get_user_model()
 
 class Tag(models.Model):
@@ -13,6 +13,11 @@ class Tag(models.Model):
         max_length=32,
         unique=True,
         verbose_name='Slug'
+    )
+    color = models.CharField(
+    max_length=7,
+    verbose_name='Цвет в HEX',
+    default='#FFFFFF'
     )
 
     class Meta:

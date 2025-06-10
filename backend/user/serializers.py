@@ -2,32 +2,37 @@ from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer
 
 from .models import CustomUser
-from recipes.models import Subscription
+from recipes.models import Subscription, Recipe
 from recipes.utils.Base64ImageField import Base64ImageField
 
-
-class CustomUserSerializer(serializers.ModelSerializer):
+class CustomUserBaseSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
     avatar = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = CustomUser
         fields = (
-            'id', 'email', 'username', 'first_name', 'last_name',
-            'avatar', 'is_subscribed', 'recipes', 'recipes_count'
+            'id', 'username', 'first_name', 'last_name',
+            'email', 'is_subscribed', 'avatar'
         )
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return Subscription.objects.filter(user=request.user, author=obj).exists()
+        if request and request.user.is_authenticated:
+            return Subscription.objects.filter(
+                user=request.user,
+                author=obj
+            ).exists()
+        return False
 
+class CustomUserWithRecipesSerializer(CustomUserBaseSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta(CustomUserBaseSerializer.Meta):
+        fields = CustomUserBaseSerializer.Meta.fields + ('recipes', 'recipes_count')
 
     def get_recipes(self, obj):
-        from recipes.serializers import RecipeMiniSerializer  # локальный импорт
         request = self.context.get('request')
         recipes = obj.recipes.all()
         limit = request.query_params.get('recipes_limit')
@@ -37,7 +42,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     
@@ -51,3 +55,8 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             'first_name', 'last_name',
             'password',
         )
+        
+class RecipeMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
