@@ -1,13 +1,15 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
-from recipes.models import Subscription
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .serializers import CustomUserBaseSerializer, CustomUserWithRecipesSerializer
+from djoser.views import UserViewSet
+from recipes.models import Subscription
+
+from .serializers import (CustomUserBaseSerializer,
+                          CustomUserWithRecipesSerializer)
 
 User = get_user_model()
 

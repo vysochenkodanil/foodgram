@@ -1,3 +1,5 @@
+from rest_framework import serializers
+
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -7,9 +9,10 @@ from recipes.models import (
     Subscription,
     Tag,
 )
-from rest_framework import serializers
-from user.serializers import CustomUserBaseSerializer, CustomUserWithRecipesSerializer
-
+from user.serializers import (
+    CustomUserBaseSerializer,
+    CustomUserWithRecipesSerializer,
+)
 from .utils.Base64ImageField import Base64ImageField
 
 
@@ -143,9 +146,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def validate_tags(self, value):
         if not value:
-            raise serializers.ValidationError(
-                "Нужно указать хотя бы один тег."
-            )
+            raise serializers.ValidationError("Нужно указать хотя бы один тег.")
         tag_ids = [tag.id for tag in value]
         if len(tag_ids) != len(set(tag_ids)):
             raise serializers.ValidationError("Теги не должны повторяться.")
@@ -162,7 +163,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                 )
             objs.append(
                 IngredientInRecipe(
-                    recipe=recipe, ingredient=ingredient, amount=item["amount"]
+                    recipe=recipe,
+                    ingredient=ingredient,
+                    amount=item["amount"]
                 )
             )
         IngredientInRecipe.objects.bulk_create(objs)
@@ -195,7 +198,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             )
         if "tags" not in self.initial_data:
             raise serializers.ValidationError(
-                {"tags": ('Поле "tags" обязательно для обновления рецепта.')}
+                {"tags": 'Поле "tags" обязательно для обновления рецепта.'}
             )
 
         ingredients_data = validated_data.pop("ingredients")
