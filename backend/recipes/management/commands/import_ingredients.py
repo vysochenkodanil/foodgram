@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Загрузка ингредиентов из JSON'
 
     def handle(self, *args, **options):
-        file_path = 'backend/data/ingredients.json'
+        file_path = 'data/ingredients.json'
 
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)

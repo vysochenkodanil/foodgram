@@ -9,7 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         with open(
-            "backend/data/ingredients.csv",
+            "data/ingredients.json",
             encoding="utf-8",
         ) as file:
             reader = csv.reader(file)
