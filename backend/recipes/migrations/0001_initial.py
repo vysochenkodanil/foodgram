@@ -14,13 +14,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Favorite',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
             name='Ingredient',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=128, unique=True)),
                 ('measurement_unit', models.CharField(max_length=32)),
             ],
@@ -28,40 +30,49 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='IngredientInRecipe',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('amount', models.PositiveIntegerField()),
             ],
         ),
         migrations.CreateModel(
             name='Recipe',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=256)),
                 ('image', models.ImageField(upload_to='recipes/images/')),
                 ('text', models.TextField()),
                 ('cooking_time', models.PositiveIntegerField()),
-                ('pub_date', models.DateTimeField(auto_now_add=True, null=True, verbose_name='Дата публикации')),
+                ('pub_date', models.DateTimeField(auto_now_add=True,
+                 null=True, verbose_name='Дата публикации')),
             ],
         ),
         migrations.CreateModel(
             name='ShoppingCart',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
             name='Subscription',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
             name='Tag',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=32, unique=True, verbose_name='Название')),
-                ('slug', models.SlugField(max_length=32, unique=True, verbose_name='Slug')),
-                ('color', models.CharField(default='#FFFFFF', max_length=7, verbose_name='Цвет в HEX')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=32,
+                 unique=True, verbose_name='Название')),
+                ('slug', models.SlugField(max_length=32,
+                 unique=True, verbose_name='Slug')),
+                ('color', models.CharField(default='#FFFFFF',
+                 max_length=7, verbose_name='Цвет в HEX')),
             ],
             options={
                 'verbose_name': 'Тег',

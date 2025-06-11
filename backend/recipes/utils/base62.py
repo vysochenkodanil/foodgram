@@ -1,5 +1,6 @@
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+
 def encode_base62(num):
     if num == 0:
         return ALPHABET[0]
@@ -10,6 +11,7 @@ def encode_base62(num):
         arr.append(ALPHABET[rem])
     arr.reverse()
     return ''.join(arr)
+
 
 def decode_base62(short_code):
     base = len(ALPHABET)

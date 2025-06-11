@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class CustomUserViewSet(UserViewSet):
     permission_classes = [IsAuthenticated]
 
@@ -39,7 +40,8 @@ class CustomUserViewSet(UserViewSet):
             )
 
         Subscription.objects.create(user=current_user, author=author)
-        serializer = CustomUserWithRecipesSerializer(author, context={'request': request})
+        serializer = CustomUserWithRecipesSerializer(
+            author, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
@@ -54,7 +56,8 @@ class CustomUserViewSet(UserViewSet):
             )
 
         current_user = request.user
-        subscription = Subscription.objects.filter(user=current_user, author=author).first()
+        subscription = Subscription.objects.filter(
+            user=current_user, author=author).first()
 
         if not subscription:
             return Response(
@@ -67,14 +70,14 @@ class CustomUserViewSet(UserViewSet):
 
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @action(detail=False, methods=['put', 'delete'], url_path='me/avatar')
     def avatar(self, request):
         user = request.user
         if request.method == 'PUT':
             serializer = CustomUserBaseSerializer(
-                user, 
-                data={'avatar': request.data.get('avatar')}, 
+                user,
+                data={'avatar': request.data.get('avatar')},
                 partial=True,
                 context={'request': request}
             )
@@ -82,12 +85,13 @@ class CustomUserViewSet(UserViewSet):
                 serializer.save()
                 return Response({'avatar': user.avatar.url}, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         elif request.method == 'DELETE':
             user.avatar.delete(save=True)
             return Response(status=status.HTTP_204_NO_CONTENT)
-        
+
     @action(['get'], detail=False)
     def me(self, request):
-        serializer = self.get_serializer(request.user, context={'request': request})
+        serializer = self.get_serializer(
+            request.user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -1,11 +1,13 @@
-import base64, uuid
+import base64
+import uuid
 
 from rest_framework import serializers
 from django.core.files.base import ContentFile
 
 
-class Base64ImageField(serializers.ImageField): #Кастомный сериализатор для поля с картинками
-    
+# Кастомный сериализатор для поля с картинками
+class Base64ImageField(serializers.ImageField):
+
     def to_internal_value(self, data):
         if not data:
             return None

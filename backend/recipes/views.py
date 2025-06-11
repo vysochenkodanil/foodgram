@@ -17,13 +17,14 @@ from api.permissions import IsAuthorOrReadOnly
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
 
-from user.models import CustomUser 
+from user.models import CustomUser
 from user.serializers import CustomUserWithRecipesSerializer
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-pub_date')
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     search_fields = ('^name',)
     filterset_class = RecipeFilter
@@ -49,10 +50,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        read_serializer = RecipeReadSerializer(instance, context=self.get_serializer_context())
+        read_serializer = RecipeReadSerializer(
+            instance, context=self.get_serializer_context())
         return Response(read_serializer.data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -87,7 +90,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
                 return Response({'errors': 'Рецепт уже в списке покупок.'}, status=status.HTTP_400_BAD_REQUEST)
             ShoppingCart.objects.create(user=user, recipe=recipe)
-            serializer = ShoppingCartSerializer(recipe, context={'request': request})
+            serializer = ShoppingCartSerializer(
+                recipe, context={'request': request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
@@ -103,7 +107,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         short_code = encode_base62(recipe.id)
         short_link = f"http://short.link/{short_code}"
         return Response({"short-link": short_link})
-    
+
 
 def redirect_to_recipe(request, short_code):
     recipe_id = decode_base62(short_code)
@@ -114,6 +118,7 @@ def redirect_to_recipe(request, short_code):
 class FavoriteViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = FavoriteSerializer
     permission_classes = [permissions.IsAuthenticated]
+
     def get_queryset(self):
         return Recipe.objects.filter(favorited_by__user=self.request.user)
 
@@ -121,7 +126,7 @@ class FavoriteViewSet(viewsets.ReadOnlyModelViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly]
-    pagination_class = None  
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.request.user.is_authenticated:
@@ -165,7 +170,8 @@ class SubscriptionViewSet(viewsets.GenericViewSet,
     def destroy(self, request, *args, **kwargs):
         author_id = self.kwargs.get('pk')
         author = get_object_or_404(CustomUser, pk=author_id)
-        subscription = Subscription.objects.filter(user=request.user, author=author).first()
+        subscription = Subscription.objects.filter(
+            user=request.user, author=author).first()
         if not subscription:
             return Response({'errors': 'Вы не подписаны на этого пользователя.'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -194,6 +200,7 @@ class DownloadShoppingCartView(APIView):
             for item in aggregated
         ]
         content = "\n".join(lines)
-        response = HttpResponse(content, content_type='text/plain; charset=utf-8')
+        response = HttpResponse(
+            content, content_type='text/plain; charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
         return response

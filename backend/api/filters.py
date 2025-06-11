@@ -5,6 +5,7 @@ from recipes.models import Tag, Recipe, Ingredient
 from django_filters.rest_framework import FilterSet, filters
 from recipes.models import Tag, Recipe, Ingredient
 
+
 class RecipeFilter(FilterSet):
     tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
@@ -12,7 +13,8 @@ class RecipeFilter(FilterSet):
         queryset=Tag.objects.all()
     )
     author = filters.NumberFilter(field_name='author__id')
-    is_in_shopping_cart = filters.BooleanFilter(method='filter_is_in_shopping_cart')
+    is_in_shopping_cart = filters.BooleanFilter(
+        method='filter_is_in_shopping_cart')
     is_favorited = filters.BooleanFilter(method='filter_is_favorited')
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
@@ -34,7 +36,6 @@ class RecipeFilter(FilterSet):
     class Meta:
         model = Recipe
         fields = ['tags', 'author', 'is_in_shopping_cart', 'is_favorited']
-
 
 
 class IngredientFilter(FilterSet):

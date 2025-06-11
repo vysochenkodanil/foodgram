@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from user.models import CustomUser 
+from user.models import CustomUser
 User = get_user_model()
+
 
 class Tag(models.Model):
     name = models.CharField(
@@ -15,9 +16,9 @@ class Tag(models.Model):
         verbose_name='Slug'
     )
     color = models.CharField(
-    max_length=7,
-    verbose_name='Цвет в HEX',
-    default='#FFFFFF'
+        max_length=7,
+        verbose_name='Цвет в HEX',
+        default='#FFFFFF'
     )
 
     class Meta:
@@ -27,7 +28,8 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
@@ -51,7 +53,8 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
@@ -67,22 +70,24 @@ class ShoppingCart(models.Model):
     class Meta:
         unique_together = ('user', 'recipe')
 
-        
+
 class Ingredient(models.Model):
     name = models.CharField(max_length=128, unique=True)
     measurement_unit = models.CharField(max_length=32)
 
     def __str__(self):
         return f'{self.name} ({self.measurement_unit})'
-    
+
+
 class IngredientInRecipe(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField()
 
     class Meta:
         unique_together = ('recipe', 'ingredient')
-    
+
 
 class Subscription(models.Model):
     user = models.ForeignKey(
@@ -94,6 +99,7 @@ class Subscription(models.Model):
 
     class Meta:
         unique_together = ('user', 'author')
+
 
 class Favorite(models.Model):
     user = models.ForeignKey(

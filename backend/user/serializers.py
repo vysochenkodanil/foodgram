@@ -5,6 +5,7 @@ from .models import CustomUser
 from recipes.models import Subscription, Recipe
 from recipes.utils.Base64ImageField import Base64ImageField
 
+
 class CustomUserBaseSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     avatar = Base64ImageField(required=False, allow_null=True)
@@ -25,12 +26,14 @@ class CustomUserBaseSerializer(serializers.ModelSerializer):
             ).exists()
         return False
 
+
 class CustomUserWithRecipesSerializer(CustomUserBaseSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CustomUserBaseSerializer.Meta):
-        fields = CustomUserBaseSerializer.Meta.fields + ('recipes', 'recipes_count')
+        fields = CustomUserBaseSerializer.Meta.fields + \
+            ('recipes', 'recipes_count')
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -43,8 +46,9 @@ class CustomUserWithRecipesSerializer(CustomUserBaseSerializer):
     def get_recipes_count(self, obj):
         return obj.recipes.count()
 
+
 class CustomUserCreateSerializer(UserCreateSerializer):
-    
+
     first_name = serializers.CharField(required=True, max_length=150)
     last_name = serializers.CharField(required=True, max_length=150)
 
@@ -55,7 +59,8 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             'first_name', 'last_name',
             'password',
         )
-        
+
+
 class RecipeMiniSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe

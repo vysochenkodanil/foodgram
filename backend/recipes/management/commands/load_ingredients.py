@@ -2,6 +2,7 @@ import csv
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient
 
+
 class Command(BaseCommand):
     help = 'Загружает ингредиенты из CSV-файла'
 
@@ -18,4 +19,5 @@ class Command(BaseCommand):
                 )
                 if created:
                     count += 1
-        self.stdout.write(self.style.SUCCESS(f'Успешно загружено {count} ингредиентов.'))
+        self.stdout.write(self.style.SUCCESS(
+            f'Успешно загружено {count} ингредиентов.'))
