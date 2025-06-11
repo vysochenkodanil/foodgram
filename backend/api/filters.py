@@ -41,19 +41,3 @@ class IngredientFilter(FilterSet):
     class Meta:
         model = Ingredient
         fields = ["name"]
-
-
-# class ShoppingCartRecipeFilter(FilterSet):
-#     is_in_shopping_cart = filters.BooleanFilter(method='filter_is_in_shopping_cart')
-
-#     def filter_is_in_shopping_cart(self, queryset, name, value):
-#         user = self.request.user
-#         if user.is_anonymous:
-#             return queryset.none() if value else queryset
-#         if value:
-#             return queryset.filter(shopping_cart__user=user)
-#         return queryset.exclude(shopping_cart__user=user)
-
-#     class Meta:
-#         model = Recipe
-#         fields = ['is_in_shopping_cart']

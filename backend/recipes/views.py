@@ -12,21 +12,13 @@ from rest_framework.views import APIView
 from user.models import CustomUser
 from user.serializers import CustomUserWithRecipesSerializer
 
-from .models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    ShoppingCart,
-    Subscription,
-    Tag,
-)
+from .models import Favorite, Ingredient, Recipe, ShoppingCart, Subscription, Tag
 from .serializers import (
     FavoriteSerializer,
     IngredientSerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
     ShoppingCartSerializer,
-    SubscriptionSerializer,
     TagPublicSerializer,
     TagReadSerializer,
 )

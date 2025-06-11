@@ -8,10 +8,7 @@ from recipes.models import (
     Tag,
 )
 from rest_framework import serializers
-from user.serializers import (
-    CustomUserBaseSerializer,
-    CustomUserWithRecipesSerializer,
-)
+from user.serializers import CustomUserBaseSerializer, CustomUserWithRecipesSerializer
 
 from .utils.Base64ImageField import Base64ImageField
 
@@ -86,12 +83,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             "text",
             "cooking_time",
         )
-
-    # def get_is_favorited(self, obj):
-    #     request = self.context.get('request')
-    #     if request is None or request.user.is_anonymous:
-    #         return False
-    #     return Favorite.objects.filter(user=request.user, recipe=obj).exists()
 
     def get_is_favorited(self, obj):
         user = self.context.get("request").user
@@ -197,12 +188,14 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if "ingredients" not in self.initial_data:
             raise serializers.ValidationError(
                 {
-                    "ingredients": 'Поле "ingredients" обязательно для обновления рецепта.'
+                    "ingredients": (
+                        'Поле "ingredients" обязательно для обновления рецепта'
+                    )
                 }
             )
         if "tags" not in self.initial_data:
             raise serializers.ValidationError(
-                {"tags": 'Поле "tags" обязательно для обновления рецепта.'}
+                {"tags": ('Поле "tags" обязательно для обновления рецепта.')}
             )
 
         ingredients_data = validated_data.pop("ingredients")

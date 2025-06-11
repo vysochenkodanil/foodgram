@@ -7,10 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .serializers import (
-    CustomUserBaseSerializer,
-    CustomUserWithRecipesSerializer,
-)
+from .serializers import CustomUserBaseSerializer, CustomUserWithRecipesSerializer
 
 User = get_user_model()
 
@@ -51,12 +48,12 @@ class CustomUserViewSet(UserViewSet):
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, id=None):
-        """Отписаться от пользователя (DELETE /users/{id}/subscribe/)"""
+        """Отписаться от пользователя (DELETE /users/{id}/subscribe/)."""
         try:
             author = User.objects.get(pk=id)
         except User.DoesNotExist:
             return Response(
-                {"error": "Пользователь не найден."},  # Добавляем тело ответа
+                {"error": "Пользователь не найден."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -69,7 +66,10 @@ class CustomUserViewSet(UserViewSet):
             return Response(
                 {
                     "error": "Вы не подписаны на этого пользователя.",
-                    "details": f"User {current_user.id} is not subscribed to author {author.id}",
+                    "details": (
+                        f"User {current_user.id} is not subscribed to "
+                        f"author {author.id}"
+                    ),
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
