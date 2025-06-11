@@ -9,11 +9,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         with open(
-            "/home/danil/Рабочий стол/dev/foodgram/data/ingredients.csv",
+            "backend/data/ingredients.csv",
             encoding="utf-8",
         ) as file:
             reader = csv.reader(file)
-            next(reader)  # Пропускаем заголовок
+            next(reader)
             count = 0
             for row in reader:
                 name, unit = row

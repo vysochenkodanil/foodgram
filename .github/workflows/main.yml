@@ -187,4 +187,3 @@ jobs:
           *Сообщение:* ${{ github.event.commits[0].message }}
           *Время:* ${{ steps.get-time.outputs.current_time }}
         parse_mode: markdo 
-
