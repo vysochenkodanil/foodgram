@@ -137,7 +137,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def validate_tags(self, value):
         if not value:
-            raise serializers.ValidationError("Нужно указать хотя бы один тег.")
+            raise serializers.ValidationError(
+                "Нужно указать хотя бы один тег."
+            )
         tag_ids = [tag.id for tag in value]
         if len(tag_ids) != len(set(tag_ids)):
             raise serializers.ValidationError("Теги не должны повторяться.")
