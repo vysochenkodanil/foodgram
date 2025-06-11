@@ -1,14 +1,18 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 from user.models import CustomUser
 
 User = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=32, unique=True, verbose_name="Название")
+    name = models.CharField(
+        max_length=32, unique=True, verbose_name="Название"
+    )
     slug = models.SlugField(max_length=32, unique=True, verbose_name="Slug")
-    color = models.CharField(max_length=7, verbose_name="Цвет в HEX", default="#FFFFFF")
+    color = models.CharField(
+        max_length=7, verbose_name="Цвет в HEX", default="#FFFFFF"
+    )
 
     class Meta:
         verbose_name = "Тег"
@@ -20,14 +24,19 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recipes")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="recipes"
+    )
     name = models.CharField(max_length=256)
     image = models.ImageField(upload_to="recipes/images/")
     text = models.TextField()
     cooking_time = models.PositiveIntegerField()
     tags = models.ManyToManyField(Tag, related_name="recipes")
     pub_date = models.DateTimeField(
-        auto_now_add=True, verbose_name="Дата публикации", null=True, blank=True
+        auto_now_add=True,
+        verbose_name="Дата публикации",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
@@ -78,7 +87,9 @@ class Subscription(models.Model):
 
 
 class Favorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorites")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="favorites"
+    )
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name="favorited_by"
     )

@@ -28,7 +28,8 @@ class Migration(migrations.Migration):
             model_name="ingredientinrecipe",
             name="ingredient",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="recipes.ingredient"
+                on_delete=django.db.models.deletion.CASCADE,
+                to="recipes.ingredient",
             ),
         ),
         migrations.AddField(
@@ -97,7 +98,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="recipe",
             name="tags",
-            field=models.ManyToManyField(related_name="recipes", to="recipes.tag"),
+            field=models.ManyToManyField(
+                related_name="recipes", to="recipes.tag"
+            ),
         ),
         migrations.AlterUniqueTogether(
             name="ingredientinrecipe",

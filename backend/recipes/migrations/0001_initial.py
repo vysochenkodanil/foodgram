@@ -74,7 +74,9 @@ class Migration(migrations.Migration):
                 (
                     "pub_date",
                     models.DateTimeField(
-                        auto_now_add=True, null=True, verbose_name="Дата публикации"
+                        auto_now_add=True,
+                        null=True,
+                        verbose_name="Дата публикации",
                     ),
                 ),
             ],
@@ -127,12 +129,16 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "slug",
-                    models.SlugField(max_length=32, unique=True, verbose_name="Slug"),
+                    models.SlugField(
+                        max_length=32, unique=True, verbose_name="Slug"
+                    ),
                 ),
                 (
                     "color",
                     models.CharField(
-                        default="#FFFFFF", max_length=7, verbose_name="Цвет в HEX"
+                        default="#FFFFFF",
+                        max_length=7,
+                        verbose_name="Цвет в HEX",
                     ),
                 ),
             ],

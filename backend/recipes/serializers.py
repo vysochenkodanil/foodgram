@@ -1,15 +1,18 @@
-from rest_framework import serializers
-
-from user.serializers import CustomUserWithRecipesSerializer, CustomUserBaseSerializer
 from recipes.models import (
-    Tag,
+    Favorite,
     Ingredient,
     IngredientInRecipe,
-    Favorite,
     Recipe,
     ShoppingCart,
     Subscription,
+    Tag,
 )
+from rest_framework import serializers
+from user.serializers import (
+    CustomUserBaseSerializer,
+    CustomUserWithRecipesSerializer,
+)
+
 from .utils.Base64ImageField import Base64ImageField
 
 
@@ -42,7 +45,9 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = IngredientInRecipe
@@ -98,7 +103,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None or request.user.is_anonymous:
             return False
-        return ShoppingCart.objects.filter(user=request.user, recipe=obj).exists()
+        return ShoppingCart.objects.filter(
+            user=request.user, recipe=obj
+        ).exists()
 
 
 class WriteIngredientInRecipeSerializer(serializers.ModelSerializer):
@@ -112,26 +119,42 @@ class WriteIngredientInRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = WriteIngredientInRecipeSerializer(many=True, write_only=True)
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
     image = Base64ImageField()
 
     class Meta:
         model = Recipe
-        fields = ("id", "ingredients", "tags", "image", "name", "text", "cooking_time")
+        fields = (
+            "id",
+            "ingredients",
+            "tags",
+            "image",
+            "name",
+            "text",
+            "cooking_time",
+        )
 
     def validate_ingredients(self, value):
         if not value:
-            raise serializers.ValidationError("Добавьте хотя бы один ингредиент.")
+            raise serializers.ValidationError(
+                "Добавьте хотя бы один ингредиент."
+            )
         unique_ingredients = set()
         for item in value:
             if item["id"] in unique_ingredients:
-                raise serializers.ValidationError("Ингредиенты не должны повторяться.")
+                raise serializers.ValidationError(
+                    "Ингредиенты не должны повторяться."
+                )
             unique_ingredients.add(item["id"])
         return value
 
     def validate_tags(self, value):
         if not value:
-            raise serializers.ValidationError("Нужно указать хотя бы один тег.")
+            raise serializers.ValidationError(
+                "Нужно указать хотя бы один тег."
+            )
         tag_ids = [tag.id for tag in value]
         if len(tag_ids) != len(set(tag_ids)):
             raise serializers.ValidationError("Теги не должны повторяться.")

@@ -1,9 +1,9 @@
-from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer
+from recipes.models import Recipe, Subscription
+from recipes.utils.Base64ImageField import Base64ImageField
+from rest_framework import serializers
 
 from .models import CustomUser
-from recipes.models import Subscription, Recipe
-from recipes.utils.Base64ImageField import Base64ImageField
 
 
 class CustomUserBaseSerializer(serializers.ModelSerializer):
@@ -25,7 +25,9 @@ class CustomUserBaseSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
         if request and request.user.is_authenticated:
-            return Subscription.objects.filter(user=request.user, author=obj).exists()
+            return Subscription.objects.filter(
+                user=request.user, author=obj
+            ).exists()
         return False
 
 
@@ -34,7 +36,10 @@ class CustomUserWithRecipesSerializer(CustomUserBaseSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CustomUserBaseSerializer.Meta):
-        fields = CustomUserBaseSerializer.Meta.fields + ("recipes", "recipes_count")
+        fields = CustomUserBaseSerializer.Meta.fields + (
+            "recipes",
+            "recipes_count",
+        )
 
     def get_recipes(self, obj):
         request = self.context.get("request")

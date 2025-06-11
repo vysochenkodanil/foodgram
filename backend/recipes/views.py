@@ -1,35 +1,44 @@
-from rest_framework import viewsets, status, mixins, permissions
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django_filters.rest_framework import DjangoFilterBackend
+from api.filters import IngredientFilter, RecipeFilter
+from api.permissions import IsAuthorOrReadOnly
+from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.db.models import Sum, F
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import mixins, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from user.models import CustomUser
+from user.serializers import CustomUserWithRecipesSerializer
 
-from .models import Recipe, Tag, Ingredient, Favorite, ShoppingCart, Subscription
+from .models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Subscription,
+    Tag,
+)
 from .serializers import (
+    FavoriteSerializer,
+    IngredientSerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
     ShoppingCartSerializer,
-    FavoriteSerializer,
     SubscriptionSerializer,
-    TagReadSerializer,
     TagPublicSerializer,
-    IngredientSerializer,
+    TagReadSerializer,
 )
-from .utils.base62 import encode_base62, decode_base62
-from api.permissions import IsAuthorOrReadOnly
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from api.filters import RecipeFilter, IngredientFilter
-
-from user.models import CustomUser
-from user.serializers import CustomUserWithRecipesSerializer
+from .utils.base62 import decode_base62, encode_base62
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by("-pub_date")
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorOrReadOnly,
+    ]
     filter_backends = [DjangoFilterBackend]
     search_fields = ("^name",)
     filterset_class = RecipeFilter
@@ -54,7 +63,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         read_serializer = RecipeReadSerializer(
@@ -63,7 +74,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(read_serializer.data)
 
     @action(
-        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
     )
     def favorite(self, request, pk=None):
         recipe = self.get_object()
@@ -101,7 +114,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe = Recipe.objects.get(pk=pk)
         except Recipe.DoesNotExist:
             return Response(
-                {"errors": "Рецепт не найден."}, status=status.HTTP_404_NOT_FOUND
+                {"errors": "Рецепт не найден."},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         if request.method == "POST":
@@ -111,7 +125,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             ShoppingCart.objects.create(user=user, recipe=recipe)
-            serializer = ShoppingCartSerializer(recipe, context={"request": request})
+            serializer = ShoppingCartSerializer(
+                recipe, context={"request": request}
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == "DELETE":
@@ -224,9 +240,14 @@ class DownloadShoppingCartView(APIView):
         ).annotate(total=Sum("amount"))
 
         lines = [
-            f"{item['name']} ({item['unit']}) — {item['total']}" for item in aggregated
+            f"{item['name']} ({item['unit']}) — {item['total']}"
+            for item in aggregated
         ]
         content = "\n".join(lines)
-        response = HttpResponse(content, content_type="text/plain; charset=utf-8")
-        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
+        response = HttpResponse(
+            content, content_type="text/plain; charset=utf-8"
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
         return response

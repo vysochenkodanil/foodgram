@@ -1,14 +1,16 @@
-from djoser.views import UserViewSet
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from recipes.models import Subscription
-
-from .serializers import CustomUserWithRecipesSerializer, CustomUserBaseSerializer
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
+from recipes.models import Subscription
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
+from .serializers import (
+    CustomUserBaseSerializer,
+    CustomUserWithRecipesSerializer,
+)
 
 User = get_user_model()
 
@@ -33,7 +35,9 @@ class CustomUserViewSet(UserViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if Subscription.objects.filter(user=current_user, author=author).exists():
+        if Subscription.objects.filter(
+            user=current_user, author=author
+        ).exists():
             return Response(
                 {"errors": "Вы уже подписаны на этого пользователя."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -85,8 +89,12 @@ class CustomUserViewSet(UserViewSet):
             )
             if serializer.is_valid():
                 serializer.save()
-                return Response({"avatar": user.avatar.url}, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"avatar": user.avatar.url}, status=status.HTTP_200_OK
+                )
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
         elif request.method == "DELETE":
             user.avatar.delete(save=True)
@@ -94,5 +102,7 @@ class CustomUserViewSet(UserViewSet):
 
     @action(["get"], detail=False)
     def me(self, request):
-        serializer = self.get_serializer(request.user, context={"request": request})
+        serializer = self.get_serializer(
+            request.user, context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
