@@ -1,18 +1,9 @@
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingCart, Subscription, Tag)
 from rest_framework import serializers
+from user.serializers import (CustomUserBaseSerializer,
+                              CustomUserWithRecipesSerializer)
 
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    IngredientInRecipe,
-    Recipe,
-    ShoppingCart,
-    Subscription,
-    Tag,
-)
-from user.serializers import (
-    CustomUserBaseSerializer,
-    CustomUserWithRecipesSerializer,
-)
 from .utils.Base64ImageField import Base64ImageField
 
 
