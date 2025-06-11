@@ -10,7 +10,7 @@ def encode_base62(num):
         num, rem = divmod(num, base)
         arr.append(ALPHABET[rem])
     arr.reverse()
-    return ''.join(arr)
+    return "".join(arr)
 
 
 def decode_base62(short_code):

@@ -10,85 +10,109 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('recipes', '0001_initial'),
+        ("recipes", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='favorite',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='favorites', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
-            model_name='ingredientinrecipe',
-            name='ingredient',
+            model_name="favorite",
+            name="user",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to='recipes.ingredient'),
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="favorites",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='author',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='recipes', to=settings.AUTH_USER_MODEL),
+            model_name="ingredientinrecipe",
+            name="ingredient",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="recipes.ingredient"
+            ),
         ),
         migrations.AddField(
-            model_name='ingredientinrecipe',
-            name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='recipe_ingredients', to='recipes.recipe'),
+            model_name="recipe",
+            name="author",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="recipes",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='favorite',
-            name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='favorited_by', to='recipes.recipe'),
+            model_name="ingredientinrecipe",
+            name="recipe",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="recipe_ingredients",
+                to="recipes.recipe",
+            ),
         ),
         migrations.AddField(
-            model_name='shoppingcart',
-            name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='in_shopping_carts', to='recipes.recipe'),
+            model_name="favorite",
+            name="recipe",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="favorited_by",
+                to="recipes.recipe",
+            ),
         ),
         migrations.AddField(
-            model_name='shoppingcart',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='shopping_cart', to=settings.AUTH_USER_MODEL),
+            model_name="shoppingcart",
+            name="recipe",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="in_shopping_carts",
+                to="recipes.recipe",
+            ),
         ),
         migrations.AddField(
-            model_name='subscription',
-            name='author',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='followers', to=settings.AUTH_USER_MODEL),
+            model_name="shoppingcart",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="shopping_cart",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='subscription',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='subscriptions', to=settings.AUTH_USER_MODEL),
+            model_name="subscription",
+            name="author",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="followers",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='tags',
-            field=models.ManyToManyField(
-                related_name='recipes', to='recipes.tag'),
+            model_name="subscription",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="subscriptions",
+                to=settings.AUTH_USER_MODEL,
+            ),
+        ),
+        migrations.AddField(
+            model_name="recipe",
+            name="tags",
+            field=models.ManyToManyField(related_name="recipes", to="recipes.tag"),
         ),
         migrations.AlterUniqueTogether(
-            name='ingredientinrecipe',
-            unique_together={('recipe', 'ingredient')},
+            name="ingredientinrecipe",
+            unique_together={("recipe", "ingredient")},
         ),
         migrations.AlterUniqueTogether(
-            name='favorite',
-            unique_together={('user', 'recipe')},
+            name="favorite",
+            unique_together={("user", "recipe")},
         ),
         migrations.AlterUniqueTogether(
-            name='shoppingcart',
-            unique_together={('user', 'recipe')},
+            name="shoppingcart",
+            unique_together={("user", "recipe")},
         ),
         migrations.AlterUniqueTogether(
-            name='subscription',
-            unique_together={('user', 'author')},
+            name="subscription",
+            unique_together={("user", "author")},
         ),
     ]

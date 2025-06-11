@@ -4,20 +4,23 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    help = 'Загружает ингредиенты из CSV-файла'
+    help = "Загружает ингредиенты из CSV-файла"
 
     def handle(self, *args, **kwargs):
-        with open('/home/danil/Рабочий стол/dev/foodgram/foodgram/data/ingredients.csv', encoding='utf-8') as file:
+        with open(
+            "/home/danil/Рабочий стол/dev/foodgram/foodgram/data/ingredients.csv",
+            encoding="utf-8",
+        ) as file:
             reader = csv.reader(file)
             next(reader)  # Пропускаем заголовок
             count = 0
             for row in reader:
                 name, unit = row
                 obj, created = Ingredient.objects.get_or_create(
-                    name=name.strip(),
-                    measurement_unit=unit.strip()
+                    name=name.strip(), measurement_unit=unit.strip()
                 )
                 if created:
                     count += 1
-        self.stdout.write(self.style.SUCCESS(
-            f'Успешно загружено {count} ингредиентов.'))
+        self.stdout.write(
+            self.style.SUCCESS(f"Успешно загружено {count} ингредиентов.")
+        )

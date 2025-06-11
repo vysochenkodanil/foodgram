@@ -8,14 +8,11 @@ from recipes.models import Tag, Recipe, Ingredient
 
 class RecipeFilter(FilterSet):
     tags = filters.ModelMultipleChoiceFilter(
-        field_name='tags__slug',
-        to_field_name='slug',
-        queryset=Tag.objects.all()
+        field_name="tags__slug", to_field_name="slug", queryset=Tag.objects.all()
     )
-    author = filters.NumberFilter(field_name='author__id')
-    is_in_shopping_cart = filters.BooleanFilter(
-        method='filter_is_in_shopping_cart')
-    is_favorited = filters.BooleanFilter(method='filter_is_favorited')
+    author = filters.NumberFilter(field_name="author__id")
+    is_in_shopping_cart = filters.BooleanFilter(method="filter_is_in_shopping_cart")
+    is_favorited = filters.BooleanFilter(method="filter_is_favorited")
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         user = self.request.user
@@ -35,7 +32,7 @@ class RecipeFilter(FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['tags', 'author', 'is_in_shopping_cart', 'is_favorited']
+        fields = ["tags", "author", "is_in_shopping_cart", "is_favorited"]
 
 
 class IngredientFilter(FilterSet):
@@ -43,7 +40,7 @@ class IngredientFilter(FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ['name']
+        fields = ["name"]
 
 
 # class ShoppingCartRecipeFilter(FilterSet):
