@@ -177,4 +177,14 @@ jobs:
       with: 
         to: ${{ secrets.TELEGRAM_TO }} 
         token: ${{ secrets.TELEGRAM_TOKEN }} 
-        message: Деплой успешно выполнен! 
+        message: |
+          *🚀 Деплой успешно выполнен!*
+          
+          *Автор:* [${{ github.actor }}](https://github.com/${{ github.actor }})
+          *Репозиторий:* [${{ github.repository }}](https://github.com/${{ github.repository }})
+          *Ветка:* ${{ github.ref_name }}
+          *Коммит:* [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          *Сообщение:* ${{ github.event.commits[0].message }}
+          *Время:* ${{ steps.get-time.outputs.current_time }}
+        parse_mode: markdo 
+
