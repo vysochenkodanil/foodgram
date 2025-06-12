@@ -161,7 +161,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_serializer_class(self):
         if self.request.user.is_authenticated:
-            return TagReadSerializer  # Авторизованные видят цвет
+            return TagReadSerializer
         return TagPublicSerializer
 
 

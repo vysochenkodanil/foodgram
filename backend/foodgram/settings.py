@@ -11,6 +11,12 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default-secret-key")
 
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://final-foodgram.zapto.org",
+    "http://final-foodgram.zapto.org",
+]
+CSRF_COOKIE_SECURE = True 
+
 ALLOWED_HOSTS = [
     os.getenv("LOCAL_IP"),
     "localhost",
@@ -22,7 +28,7 @@ ALLOWED_HOSTS = [
 
 
 INSTALLED_APPS = [
-    "user.apps.UserConfig",  # перенес это вперед, пока что
+    "user.apps.UserConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -101,10 +107,6 @@ DJOSER = {
 
 WSGI_APPLICATION = "foodgram.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -115,9 +117,6 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", 5432),
     }
 }
-
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -135,9 +134,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
-
 LANGUAGE_CODE = "ru-RU"
 
 TIME_ZONE = "UTC"
@@ -148,17 +144,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = "/static/"
 
 STATIC_ROOT = BASE_DIR / "collected_static"
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = "/backend_media/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
