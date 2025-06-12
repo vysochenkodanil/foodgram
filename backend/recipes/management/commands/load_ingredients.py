@@ -1,30 +1,37 @@
 import csv
 import os
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient
 
-
 class Command(BaseCommand):
-    help = "Загружает ингредиенты из CSV-файла"
+    help = "Загружает ингредиенты из CSV"
 
-    def handle(self, *args, **kwargs):
-        file_path = os.path.join(settings.BASE_DIR, 'data', 'ingredients.csv')
-        with open(
-            "data/ingredients.csv",
-            encoding="utf-8",
-        ) as file:
+    def handle(self, *args, **options):
+        base_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+        )
+        docker_path = "/app/data/ingredients.csv"
+        local_path = os.path.join(base_dir, "data", "ingredients.csv")
+        if os.path.exists(docker_path):
+            file_path = docker_path
+        elif os.path.exists(local_path):
+            file_path = local_path
+        else:
+            self.stderr.write(self.style.ERROR("Файл не найден!"))
+            return
+        
+        with open(file_path, encoding="utf-8") as file:
             reader = csv.reader(file)
             next(reader)
             count = 0
             for row in reader:
                 name, unit = row
-                obj, created = Ingredient.objects.get_or_create(
-                    name=name.strip(), measurement_unit=unit.strip()
+                _, created = Ingredient.objects.get_or_create(
+                    name=name.strip(),
+                    measurement_unit=unit.strip()
                 )
-                if created:
-                    count += 1
+                count += int(created)
         self.stdout.write(
-            self.style.SUCCESS(f"Успешно загружено {count} ингредиентов.")
+            self.style.SUCCESS(f"Загружено ингредиентов: {count}")
         )
