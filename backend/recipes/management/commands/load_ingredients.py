@@ -21,7 +21,7 @@ class Command(BaseCommand):
         else:
             self.stderr.write(self.style.ERROR("Файл не найден!"))
             return
-  
+
         with open(file_path, encoding="utf-8") as file:
             reader = csv.reader(file)
             next(reader)
