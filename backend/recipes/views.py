@@ -74,8 +74,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 {"errors": "Рецепт уже в избранном."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        Favorite.objects.create(user=user, recipe=recipe)
-        serializer = FavoriteSerializer(recipe, context={"request": request})
+        favorite_obj = Favorite.objects.create(user=user, recipe=recipe)
+
+        serializer = FavoriteSerializer(
+            favorite_obj,
+            context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @favorite.mapping.delete

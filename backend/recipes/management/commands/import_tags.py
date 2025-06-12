@@ -1,5 +1,6 @@
 import csv
-
+import os
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from recipes.models import Tag
 
@@ -8,6 +9,7 @@ class Command(BaseCommand):
     help = "Загружаем тэги из csv."
 
     def handle(self, *args, **options):
+        file_path = os.path.join(settings.BASE_DIR, 'data', 'ingredients.csv')
         with open("data/tags.csv", encoding="utf-8") as file:
             reader = csv.reader(file)
             for row in reader:

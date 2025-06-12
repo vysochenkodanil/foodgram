@@ -19,12 +19,12 @@ router.register(r"tags", TagViewSet, basename="tag")
 router.register(r"ingredients", IngredientViewSet, basename="ingredient")
 
 urlpatterns = [
-    *router.urls,
     path(
         "recipes/download_shopping_cart/",
         DownloadShoppingCartView.as_view(),
         name="download_shopping_cart",
     ),
+    *router.urls,
     path(
         "r/<str:short_code>/",
         views.redirect_to_recipe,
