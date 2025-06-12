@@ -15,7 +15,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://final-foodgram.zapto.org",
     "http://final-foodgram.zapto.org",
 ]
-CSRF_COOKIE_SECURE = True 
+CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS = [
     os.getenv("LOCAL_IP"),
@@ -153,4 +153,3 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = "/backend_media/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
