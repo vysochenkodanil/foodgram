@@ -28,7 +28,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         IsAuthorOrReadOnly,
     ]
     filter_backends = [DjangoFilterBackend]
-    search_fields = ("^name",)
+    search_fields = ("^name","name")
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
