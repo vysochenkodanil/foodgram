@@ -1,48 +1,27 @@
+from api.filters import IngredientFilter, RecipeFilter
+from api.permissions import IsAuthorOrReadOnly
+from api.utils.base62 import decode_base62, encode_base62
 from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import (
-    mixins,
-    permissions,
-    status,
-    viewsets,
-)
+from recipes.models import (Favorite, Ingredient, Recipe, ShoppingCart,
+                            Subscription, Tag)
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import IsAuthorOrReadOnly
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    ShoppingCart,
-    Subscription,
-    Tag,
-)
-from api.utils.base62 import decode_base62, encode_base62
 from user.models import CustomUser
 
-from .serializers import (
-    CustomUserBaseSerializer,
-    CustomUserWithRecipesSerializer,
-    FavoriteSerializer,
-    IngredientSerializer,
-    RecipeReadSerializer,
-    RecipeWriteSerializer,
-    ShoppingCartSerializer,
-    TagPublicSerializer,
-    TagReadSerializer,
-)
-
+from .serializers import (CustomUserBaseSerializer,
+                          CustomUserWithRecipesSerializer, FavoriteSerializer,
+                          IngredientSerializer, RecipeReadSerializer,
+                          RecipeWriteSerializer, ShoppingCartSerializer,
+                          TagPublicSerializer, TagReadSerializer)
 
 User = get_user_model()
 
@@ -295,17 +274,14 @@ class DownloadShoppingCartView(APIView):
         ).annotate(total=Sum("amount"))
 
         lines = [
-            f"{item['name']} ({item['unit']}) — {item['total']}"
-            for item in aggregated
+            f"{item['name']} ({item['unit']}) — {item['total']}" for item in aggregated
         ]
         content = "\n".join(lines)
         response = HttpResponse(
             content,
             content_type="text/plain; charset=utf-8",
         )
-        response["Content-Disposition"] = (
-            'attachment; filename="shopping_list.txt"'
-        )
+        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
         return response
 
 
