@@ -13,6 +13,7 @@ from api.views import (
     TagViewSet,
 )
 
+
 router = DefaultRouter()
 router.register(r"recipes", RecipeViewSet, basename="recipe")
 router.register(
