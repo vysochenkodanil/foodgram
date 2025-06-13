@@ -1,5 +1,7 @@
-from api.utils.Base64ImageField import Base64ImageField
 from djoser.serializers import UserCreateSerializer
+from rest_framework import serializers
+
+from api.utils.Base64ImageField import Base64ImageField
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -9,7 +11,6 @@ from recipes.models import (
     Subscription,
     Tag,
 )
-from rest_framework import serializers
 from user.models import CustomUser
 
 
@@ -32,7 +33,10 @@ class CustomUserBaseSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
         if request and request.user.is_authenticated:
-            return Subscription.objects.filter(user=request.user, author=obj).exists()
+            return Subscription.objects.filter(
+                user=request.user,
+                author=obj,
+            ).exists()
         return False
 
 
@@ -103,7 +107,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = IngredientInRecipe
@@ -123,7 +129,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagPublicSerializer(many=True, read_only=True)
     author = CustomUserBaseSerializer(read_only=True)
     ingredients = IngredientInRecipeReadSerializer(
-        many=True, source="recipe_ingredients", read_only=True
+        many=True,
+        source="recipe_ingredients",
+        read_only=True,
     )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -153,7 +161,10 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None or request.user.is_anonymous:
             return False
-        return ShoppingCart.objects.filter(user=request.user, recipe=obj).exists()
+        return ShoppingCart.objects.filter(
+            user=request.user,
+            recipe=obj,
+        ).exists()
 
 
 class WriteIngredientInRecipeSerializer(serializers.ModelSerializer):
@@ -167,7 +178,10 @@ class WriteIngredientInRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = WriteIngredientInRecipeSerializer(many=True, write_only=True)
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True,
+    )
     image = Base64ImageField()
 
     class Meta:
@@ -184,17 +198,23 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, value):
         if not value:
-            raise serializers.ValidationError("Добавьте хотя бы один ингредиент.")
+            raise serializers.ValidationError(
+                "Добавьте хотя бы один ингредиент."
+            )
         unique_ingredients = set()
         for item in value:
             if item["id"] in unique_ingredients:
-                raise serializers.ValidationError("Ингредиенты не должны повторяться.")
+                raise serializers.ValidationError(
+                    "Ингредиенты не должны повторяться."
+                )
             unique_ingredients.add(item["id"])
         return value
 
     def validate_tags(self, value):
         if not value:
-            raise serializers.ValidationError("Нужно указать хотя бы один тег.")
+            raise serializers.ValidationError(
+                "Нужно указать хотя бы один тег."
+            )
         tag_ids = [tag.id for tag in value]
         if len(tag_ids) != len(set(tag_ids)):
             raise serializers.ValidationError("Теги не должны повторяться.")

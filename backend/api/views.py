@@ -261,6 +261,9 @@ class SubscriptionViewSet(
 class DownloadShoppingCartView(APIView):
     permission_classes = [IsAuthenticated]
 
+    class DownloadShoppingCartView(APIView):
+        permission_classes = [IsAuthenticated]
+
     def get(self, request):
         """Возвращает файл .txt со сводным списком ингредиентов."""
         from recipes.models import IngredientInRecipe
@@ -274,14 +277,17 @@ class DownloadShoppingCartView(APIView):
         ).annotate(total=Sum("amount"))
 
         lines = [
-            f"{item['name']} ({item['unit']}) — {item['total']}" for item in aggregated
+            f"{item['name']} ({item['unit']}) — {item['total']}"
+            for item in aggregated
         ]
         content = "\n".join(lines)
         response = HttpResponse(
             content,
             content_type="text/plain; charset=utf-8",
         )
-        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
+        response[
+            "Content-Disposition"
+        ] = 'attachment; filename="shopping_list.txt"'
         return response
 
 
