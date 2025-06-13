@@ -12,7 +12,7 @@ class Command(BaseCommand):
         base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
         )
-        docker_path = "/app/ingredients.json"
+        docker_path = "/app/data/ingredients.json"
         local_path = os.path.join(base_dir, "data", "ingredients.json")
         if os.path.exists(docker_path):
             file_path = docker_path

@@ -99,9 +99,9 @@ DJOSER = {
     "LOGIN_FIELD": "email",
     "USER_CREATE_PASSWORD_RETYPE": False,
     "SERIALIZERS": {
-        "user_create": "user.serializers.CustomUserCreateSerializer",
-        "user": "user.serializers.CustomUserBaseSerializer",
-        "current_user": "user.serializers.CustomUserWithRecipesSerializer",
+        "user_create": "api.serializers.CustomUserCreateSerializer",
+        "user": "api.serializers.CustomUserBaseSerializer",
+        "current_user": "api.serializers.CustomUserWithRecipesSerializer",
     },
 }
 
