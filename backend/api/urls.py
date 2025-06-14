@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from api import views
+from api.utils.shoppingcard import DownloadShoppingCartView
 from api.views import (
     CustomUserViewSet,
     FavoriteViewSet,
@@ -11,7 +12,7 @@ from api.views import (
     SubscriptionViewSet,
     TagViewSet,
 )
-from api.utils.shoppingcard import DownloadShoppingCartView
+
 router = DefaultRouter()
 router.register(r"recipes", RecipeViewSet, basename="recipe")
 router.register(

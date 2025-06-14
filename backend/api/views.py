@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
@@ -22,7 +23,7 @@ from recipes.models import (
     Tag,
 )
 from user.models import CustomUser
-from django.conf import settings
+
 from .serializers import (
     CustomUserBaseSerializer,
     CustomUserWithRecipesSerializer,
@@ -65,7 +66,9 @@ class RecipeActionMixin:
             if not obj.exists():
                 return Response(
                     {
-                        "errors": f"Рецепт не найден в {self.model._meta.verbose_name}."
+                        "errors": f"Рецепт не найден в {
+                            self.model._meta.verbose_name
+                        }."
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -136,17 +139,18 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
         self.error_message = "Рецепт уже в списке покупок."
         return self.perform_action(request, pk)
 
-    @action( 
-        detail=True, 
-        methods=["get"], 
-        url_path="get-link", 
-    ) 
-    def get_link(self, request, pk=None): 
-        recipe = self.get_object() 
-        short_code = encode_base62(recipe.id) 
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="get-link",
+    )
+    def get_link(self, request, pk=None):
+        recipe = self.get_object()
+        short_code = encode_base62(recipe.id)
         base = settings.SHORT_LINK_BASE_URL.rstrip('/')
         short_link = f"{base}/{short_code}"
         return Response({"short-link": short_link})
+
 
 def redirect_to_recipe(request, short_code):
     recipe_id = decode_base62(short_code)

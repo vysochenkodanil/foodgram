@@ -112,7 +112,6 @@ class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
 
 class IngredientInRecipeWriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
-    # id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(min_value=1)
 
     class Meta:
@@ -241,23 +240,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         instance.recipe_ingredients.all().delete()
         self.create_ingredients(ingredients_data, instance)
         return instance
-
-
-class BaseRecipeRelationSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        return RecipeMiniSerializer(
-            instance.recipe if hasattr(instance, "recipe") else instance,
-            context=self.context,
-        ).data
-
-    def validate(self, data):
-        user = self.context["request"].user
-        recipe = self.context["recipe"]
-        if self.Meta.model.objects.filter(user=user, recipe=recipe).exists():
-            raise serializers.ValidationError(
-                f"Рецепт уже в {self.Meta.model._meta.verbose_name}."
-            )
-        return data
 
 
 class BaseRecipeRelationSerializer(serializers.ModelSerializer):
