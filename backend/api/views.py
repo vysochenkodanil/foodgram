@@ -66,9 +66,10 @@ class RecipeActionMixin:
             if not obj.exists():
                 return Response(
                     {
-                        "errors": f"Рецепт не найден в {
-                            self.model._meta.verbose_name
-                        }."
+                        "errors": (
+                            f"Рецепт не найден в "
+                            f"{self.model._meta.verbose_name}."
+                        )
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
