@@ -2,11 +2,12 @@ import json
 import os
 
 from django.core.management.base import BaseCommand
+
 from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    help = 'Загрузка ингредиентов из JSON'
+    help = "Загрузка ингредиентов из JSON"
 
     def handle(self, *args, **options):
         base_dir = os.path.abspath(
@@ -22,12 +23,12 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR("Файл не найден!"))
             return
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
             for item in data:
                 Ingredient.objects.get_or_create(
-                    name=item['name'],
-                    measurement_unit=item['measurement_unit']
+                    name=item["name"],
+                    measurement_unit=item["measurement_unit"],
                 )
 
-        self.stdout.write('Данные успешно загружены')
+        self.stdout.write("Данные успешно загружены")

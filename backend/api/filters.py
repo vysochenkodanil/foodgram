@@ -1,4 +1,5 @@
 from django_filters.rest_framework import FilterSet, filters
+
 from recipes.models import Ingredient, Recipe, Tag
 
 
@@ -10,25 +11,26 @@ class RecipeFilter(FilterSet):
     )
     author = filters.NumberFilter(field_name="author__id")
     is_in_shopping_cart = filters.BooleanFilter(
-        method="filter_is_in_shopping_cart"
+        method="filter_by_user_relation"
     )
-    is_favorited = filters.BooleanFilter(method="filter_is_favorited")
+    is_favorited = filters.BooleanFilter(method="filter_by_user_relation")
 
-    def filter_is_in_shopping_cart(self, queryset, name, value):
+    def filter_by_user_relation(self, queryset, name, value):
         user = self.request.user
         if user.is_anonymous:
             return queryset.none() if value else queryset
-        if value:
-            return queryset.filter(in_shopping_carts__user=user)
-        return queryset.exclude(in_shopping_carts__user=user)
+        field_mapping = {
+            "is_in_shopping_cart": "in_shopping_carts__user",
+            "is_favorited": "favorited_by__user",
+        }
+        field_name = field_mapping.get(name)
 
-    def filter_is_favorited(self, queryset, name, value):
-        user = self.request.user
-        if user.is_anonymous:
-            return queryset.none() if value else queryset
+        if not field_name:
+            return queryset
+
         if value:
-            return queryset.filter(favorited_by__user=user)
-        return queryset.exclude(favorited_by__user=user)
+            return queryset.filter(**{field_name: user})
+        return queryset.exclude(**{field_name: user})
 
     class Meta:
         model = Recipe

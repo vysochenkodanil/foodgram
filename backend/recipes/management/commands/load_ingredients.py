@@ -2,6 +2,7 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand
+
 from recipes.models import Ingredient
 
 
@@ -29,8 +30,7 @@ class Command(BaseCommand):
             for row in reader:
                 name, unit = row
                 _, created = Ingredient.objects.get_or_create(
-                    name=name.strip(),
-                    measurement_unit=unit.strip()
+                    name=name.strip(), measurement_unit=unit.strip()
                 )
                 count += int(created)
         self.stdout.write(

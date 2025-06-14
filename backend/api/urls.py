@@ -1,10 +1,17 @@
-from api import views
-from api.views import (CustomUserViewSet, DownloadShoppingCartView,
-                       FavoriteViewSet, IngredientViewSet, RecipeViewSet,
-                       ShoppingCartViewSet, SubscriptionViewSet, TagViewSet)
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from api import views
+from api.views import (
+    CustomUserViewSet,
+    FavoriteViewSet,
+    IngredientViewSet,
+    RecipeViewSet,
+    ShoppingCartViewSet,
+    SubscriptionViewSet,
+    TagViewSet,
+)
+from api.utils.shoppingcard import DownloadShoppingCartView
 router = DefaultRouter()
 router.register(r"recipes", RecipeViewSet, basename="recipe")
 router.register(

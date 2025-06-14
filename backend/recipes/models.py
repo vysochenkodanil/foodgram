@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+
 from user.models import CustomUser
 
 User = get_user_model()
@@ -15,11 +16,6 @@ class Tag(models.Model):
         max_length=32,
         unique=True,
         verbose_name="Slug",
-    )
-    color = models.CharField(
-        max_length=7,
-        verbose_name="Цвет в HEX",
-        default="#FFFFFF",
     )
 
     class Meta:
@@ -87,7 +83,12 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        unique_together = ("user", "recipe")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"],
+                name="unique_user_recipe_shoppingcart",
+            )
+        ]
         verbose_name = "Карточка"
         verbose_name_plural = "Карточки"
 
@@ -116,15 +117,24 @@ class IngredientInRecipe(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         related_name="recipe_ingredients",
+        verbose_name="Рецепт",
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
+        verbose_name="Ингридиент",
     )
     amount = models.PositiveIntegerField()
 
     class Meta:
-        unique_together = ("recipe", "ingredient")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recipe", "ingredient"],
+                name="unique_ingredient_in_recipe",
+            )
+        ]
+        verbose_name = "Ингредиент"
+        verbose_name_plural = "Ингредиенты"
 
 
 class Subscription(models.Model):
@@ -132,15 +142,21 @@ class Subscription(models.Model):
         CustomUser,
         related_name="subscriptions",
         on_delete=models.CASCADE,
+        verbose_name="пользователь",
     )
     author = models.ForeignKey(
         CustomUser,
         related_name="followers",
         on_delete=models.CASCADE,
+        verbose_name="автор",
     )
 
     class Meta:
-        unique_together = ("user", "author")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "author"], name="unique_subscription"
+            )
+        ]
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
 
@@ -150,14 +166,20 @@ class Favorite(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name="favorites",
+        verbose_name="пользователь",
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name="favorited_by",
+        verbose_name="избранное",
     )
 
     class Meta:
-        unique_together = ("user", "recipe")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_favorite"
+            )
+        ]
         verbose_name = "Избранное"
         verbose_name_plural = "Избранное"

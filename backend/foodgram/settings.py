@@ -153,3 +153,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = "/backend_media/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+SHORT_LINK_BASE_URL = os.environ.get(
+    "SHORT_LINK_BASE_URL", "http://short.link/"
+)
