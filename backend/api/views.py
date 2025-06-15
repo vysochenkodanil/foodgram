@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import F, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -10,13 +12,16 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from api.filters import IngredientFilter, RecipeFilter
+from api.mixins import RecipeActionMixin
 from api.permissions import IsAuthorOrReadOnly
 from api.utils.base62 import decode_base62, encode_base62
 from recipes.models import (
     Favorite,
     Ingredient,
+    IngredientInRecipe,
     Recipe,
     ShoppingCart,
     Subscription,
@@ -38,45 +43,6 @@ from .serializers import (
 User = get_user_model()
 
 
-class RecipeActionMixin:
-    model = None
-    serializer_class = None
-    error_message = ""
-    success_status = status.HTTP_201_CREATED
-
-    def perform_action(self, request, pk):
-        recipe = self.get_object()
-        user = request.user
-
-        if request.method == "POST":
-            if self.model.objects.filter(user=user, recipe=recipe).exists():
-                return Response(
-                    {"errors": self.error_message},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            self.model.objects.create(user=user, recipe=recipe)
-            serializer = self.serializer_class(
-                recipe,
-                context={"request": request},
-            )
-            return Response(serializer.data, status=self.success_status)
-
-        if request.method == "DELETE":
-            obj = self.model.objects.filter(user=user, recipe=recipe)
-            if not obj.exists():
-                return Response(
-                    {
-                        "errors": (
-                            f"Рецепт не найден в "
-                            f"{self.model._meta.verbose_name}."
-                        )
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by("-pub_date")
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
@@ -92,42 +58,19 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        read_serializer = RecipeReadSerializer(
-            serializer.instance,
-            context=self.get_serializer_context(),
-        )
-        return Response(read_serializer.data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=kwargs.pop("partial", False)
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        read_serializer = RecipeReadSerializer(
-            instance, context=self.get_serializer_context()
-        )
-        return Response(read_serializer.data)
-
     @action(
         detail=True,
         methods=["post"],
         permission_classes=[permissions.IsAuthenticated],
     )
     def favorite(self, request, pk=None):
-        self.model = Favorite
-        self.serializer_class = FavoriteSerializer
-        self.error_message = "Рецепт уже в избранном."
-        return self.perform_action(request, pk)
-
-    @favorite.mapping.delete
-    def delete_favorite(self, request, pk=None):
-        return self.favorite(request, pk)
+        return self.perform_action(
+            request=request,
+            pk=pk,
+            model=Favorite,
+            serializer_class=FavoriteSerializer,
+            error_message="Рецепт уже в избранном.",
+        )
 
     @action(
         detail=True,
@@ -148,7 +91,7 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
     def get_link(self, request, pk=None):
         recipe = self.get_object()
         short_code = encode_base62(recipe.id)
-        base = settings.SHORT_LINK_BASE_URL.rstrip('/')
+        base = settings.SHORT_LINK_BASE_URL.rstrip("/")
         short_link = f"{base}/{short_code}"
         return Response({"short-link": short_link})
 
@@ -185,7 +128,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
 
 
-class ShoppingCartViewSet(RecipeActionMixin, viewsets.ReadOnlyModelViewSet):
+class ShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ShoppingCartSerializer
     permission_classes = [IsAuthenticated]
 
@@ -268,3 +211,32 @@ class CustomUserViewSet(UserViewSet):
             request.user, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DownloadShoppingCartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Возвращает файл .txt со сводным списком ингредиентов."""
+
+        qs = IngredientInRecipe.objects.filter(
+            recipe__in_shopping_carts__user=request.user,
+        )
+        aggregated = qs.values(
+            name=F("ingredient__name"),
+            unit=F("ingredient__measurement_unit"),
+        ).annotate(total=Sum("amount"))
+
+        lines = [
+            f"{item['name']} ({item['unit']}) — {item['total']}"
+            for item in aggregated
+        ]
+        content = "\n".join(lines)
+        response = HttpResponse(
+            content,
+            content_type="text/plain; charset=utf-8",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
+        return response
