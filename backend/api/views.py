@@ -17,6 +17,16 @@ from rest_framework.views import APIView
 from api.filters import IngredientFilter, RecipeFilter
 from api.mixins import RecipeActionMixin
 from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (
+    CustomUserBaseSerializer,
+    CustomUserWithRecipesSerializer,
+    FavoriteSerializer,
+    IngredientSerializer,
+    RecipeReadSerializer,
+    RecipeWriteSerializer,
+    ShoppingCartSerializer,
+    TagPublicSerializer,
+)
 from api.utils.base62 import decode_base62, encode_base62
 from recipes.models import (
     Favorite,
@@ -28,16 +38,6 @@ from recipes.models import (
     Tag,
 )
 from user.models import CustomUser
-from api.serializers import (
-    CustomUserBaseSerializer,
-    CustomUserWithRecipesSerializer,
-    FavoriteSerializer,
-    IngredientSerializer,
-    RecipeReadSerializer,
-    RecipeWriteSerializer,
-    ShoppingCartSerializer,
-    TagPublicSerializer,
-)
 
 User = get_user_model()
 
@@ -79,9 +79,10 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         return self.perform_action(
             request=request,
-            pk=pk, model = ShoppingCart,
+            pk=pk,
+            model=ShoppingCart,
             serializer_class=ShoppingCartSerializer,
-            error_message = "Рецепт уже в списке покупок."
+            error_message="Рецепт уже в списке покупок."
         )
 
     @action(
