@@ -25,20 +25,20 @@ class RecipeActionMixin:
                 else f"Рецепт не найден в {model._meta.verbose_name}."
             )
             return Response(
-                {"errors": msg}, 
+                {"errors": msg},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if request.method == "POST":
             model.objects.create(user=user, recipe=recipe)
             serializer = serializer_class(
-                recipe, 
+                recipe,
                 context={"request": request}
             )
             return Response(
-                serializer.data, 
+                serializer.data,
                 status=status.HTTP_201_CREATED
             )
-            
+
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
