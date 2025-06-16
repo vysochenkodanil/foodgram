@@ -9,7 +9,6 @@ from api.views import (
     IngredientViewSet,
     RecipeViewSet,
     ShoppingCartViewSet,
-    SubscriptionViewSet,
     TagViewSet,
 )
 
@@ -21,11 +20,6 @@ router.register(
     basename="shopping_cart",
 )
 router.register(r"favorites", FavoriteViewSet, basename="favorite")
-router.register(
-    r"subscriptions",
-    SubscriptionViewSet,
-    basename="subscription",
-)
 router.register(r"tags", TagViewSet, basename="tag")
 router.register(r"ingredients", IngredientViewSet, basename="ingredient")
 router.register(r"users", CustomUserViewSet, basename="customuser")

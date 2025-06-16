@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import F, Sum
+from django.db.models import Count, F, Prefetch, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
@@ -82,7 +82,7 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
             pk=pk,
             model=ShoppingCart,
             serializer_class=ShoppingCartSerializer,
-            error_message="Рецепт уже в списке покупок."
+            error_message="Рецепт уже в списке покупок.",
         )
 
     @action(
@@ -140,53 +140,86 @@ class ShoppingCartViewSet(viewsets.ReadOnlyModelViewSet):
         ).order_by("-in_shopping_carts__id")
 
 
-class SubscriptionViewSet(
-    viewsets.GenericViewSet,
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-):
-    serializer_class = CustomUserWithRecipesSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return CustomUser.objects.filter(
-            subscribers__user=self.request.user,
-        )
-
-    def perform_create(self, serializer):
-        author = get_object_or_404(
-            CustomUser,
-            pk=self.request.data["author"],
-        )
-        serializer.save(
-            user=self.request.user,
-            author=author,
-        )
-
-    def destroy(self, request, *args, **kwargs):
-        author_id = self.kwargs.get("pk")
-        author = get_object_or_404(CustomUser, pk=author_id)
-        subscription = Subscription.objects.filter(
-            user=request.user,
-            author=author,
-        ).first()
-        if not subscription:
-            return Response(
-                {"errors": "Вы не подписаны на этого пользователя."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        subscription.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 class CustomUserViewSet(UserViewSet):
+    queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
 
     def get_serializer_class(self):
         if self.action in ["me", "retrieve"]:
             return CustomUserBaseSerializer
         return super().get_serializer_class()
+
+    @action(
+        detail=True,
+        methods=["post", "delete"],
+        permission_classes=[IsAuthenticated],
+        url_path="subscribe",
+        url_name="subscribe",
+    )
+    def subscribe(self, request, *args, **kwargs):
+        """Подписаться/отписаться на пользователя"""
+        author = self.get_object()
+        user = request.user
+        if user == author:
+            return Response(
+                {"error": "Нельзя подписаться на самого себя"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if request.method == "POST":
+            if Subscription.objects.filter(user=user, author=author).exists():
+                return Response(
+                    {"error": "Вы уже подписаны на этого пользователя"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            Subscription.objects.create(user=user, author=author)
+            serializer = CustomUserWithRecipesSerializer(
+                author, context={"request": request}
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        deleted_count, _ = Subscription.objects.filter(
+            user=user, author=author
+        ).delete()
+        if deleted_count == 0:
+            return Response(
+                {"error": "Вы не подписаны на этого пользователя"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="subscriptions",
+        url_name="subscriptions",
+    )
+    def subscriptions(self, request):
+        """Получить список моих подписок"""
+        user = request.user
+        authors = (
+            CustomUser.objects.filter(followers__user=user)
+            .prefetch_related(
+                Prefetch(
+                    "recipes",
+                    queryset=Recipe.objects.order_by("-pub_date").only(
+                        "id", "name", "image", "cooking_time"
+                    ),
+                )
+            )
+            .annotate(recipes_count=Count("recipes"))
+        )
+        page = self.paginate_queryset(authors)
+        if page is not None:
+            serializer = CustomUserWithRecipesSerializer(
+                page, many=True, context={"request": request}
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = CustomUserWithRecipesSerializer(
+            authors, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
 
     @action(detail=False, methods=["put", "delete"], url_path="me/avatar")
     def avatar(self, request):
@@ -203,7 +236,6 @@ class CustomUserViewSet(UserViewSet):
             return Response(
                 {"avatar": user.avatar.url}, status=status.HTTP_200_OK
             )
-
         user.avatar.delete(save=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 

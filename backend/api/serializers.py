@@ -52,7 +52,7 @@ class CustomUserWithRecipesSerializer(CustomUserBaseSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get("request")
-        recipes = obj.recipes.all()
+        recipes = obj.recipes.all().order_by("-pub_date")
         limit = request.query_params.get("recipes_limit")
         if limit and limit.isdigit():
             recipes = recipes[: int(limit)]
