@@ -28,8 +28,7 @@ from recipes.models import (
     Tag,
 )
 from user.models import CustomUser
-
-from .serializers import (
+from api.serializers import (
     CustomUserBaseSerializer,
     CustomUserWithRecipesSerializer,
     FavoriteSerializer,
@@ -60,7 +59,7 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=["post"],
+        methods=["post", "delete"],
         permission_classes=[permissions.IsAuthenticated],
     )
     def favorite(self, request, pk=None):
@@ -78,10 +77,12 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated],
     )
     def shopping_cart(self, request, pk=None):
-        self.model = ShoppingCart
-        self.serializer_class = ShoppingCartSerializer
-        self.error_message = "Рецепт уже в списке покупок."
-        return self.perform_action(request, pk)
+        return self.perform_action(
+            request=request,
+            pk=pk, model = ShoppingCart,
+            serializer_class=ShoppingCartSerializer,
+            error_message = "Рецепт уже в списке покупок."
+        )
 
     @action(
         detail=True,

@@ -14,30 +14,20 @@ class RecipeActionMixin:
         recipe = self.get_object()
         user = request.user
         queryset = model.objects.filter(user=user, recipe=recipe)
+        exists = queryset.exists()
+        if (request.method == "POST" and exists) or (
+            request.method == "DELETE" and not exists
+            ):
+                msg = (
+                    error_message
+                    if request.method == "POST"
+                    else f"Рецепт не найден в {model._meta.verbose_name}."
+                )
+                return Response({"errors": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.method == "POST":
-            if queryset.exists():
-                return Response(
-                    {"errors": error_message},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            model.objects.create(user=user, recipe=recipe)
-            serializer = serializer_class(
-                recipe, context={"request": request}
-            )
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
-
-        elif request.method == "DELETE":
-            if not queryset.exists():
-                return Response(
-                    {
-                        "errors": (
-                            f"Рецепт не найден в {model._meta.verbose_name}."
-                        )
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            queryset.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+                model.objects.create(user=user, recipe=recipe)
+                serializer = serializer_class(recipe, context={"request": request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
