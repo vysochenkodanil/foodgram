@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Count, F, Prefetch, Sum
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -87,15 +87,15 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=["get"],
+        methods=["GET"],
         url_path="get-link",
+        url_name="get-link",
     )
     def get_link(self, request, pk=None):
-        recipe = self.get_object()
-        short_code = encode_base62(recipe.id)
-        base = settings.SHORT_LINK_BASE_URL.rstrip("/")
-        short_link = f"{base}/{short_code}"
-        return Response({"short-link": short_link})
+        if not Recipe.objects.filter(pk=pk).exists():
+            raise Http404("Рецепт не найден")
+        url = request.build_absolute_uri(f"/recipes/{pk}/")
+        return Response({"short-link": url}, status=status.HTTP_200_OK)
 
 
 def redirect_to_recipe(request, short_code):
