@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.mixins import RecipeActionMixin
+from api.pagination import CustomLimitPagination
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (
     CustomUserBaseSerializer,
@@ -47,6 +48,7 @@ class RecipeViewSet(RecipeActionMixin, viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     search_fields = ("^name", "name")
     filterset_class = RecipeFilter
+    pagination_class = CustomLimitPagination
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -116,7 +118,6 @@ class FavoriteViewSet(viewsets.ReadOnlyModelViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly]
-    pagination_class = None
     serializer_class = TagPublicSerializer
 
 
@@ -124,7 +125,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [permissions.AllowAny]
-    pagination_class = None
     filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
 
@@ -144,6 +144,7 @@ class CustomUserViewSet(UserViewSet):
     permission_classes = [IsAuthenticated]
     lookup_url_kwarg = "id"
     lookup_field = "id"
+    pagination_class = CustomLimitPagination
 
     def get_serializer_class(self):
         if self.action in ["me", "retrieve"]:
