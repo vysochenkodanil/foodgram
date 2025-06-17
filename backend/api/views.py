@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Count, F, Prefetch, Sum
-from django.http import HttpResponse, Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -27,7 +27,7 @@ from api.serializers import (
     ShoppingCartSerializer,
     TagPublicSerializer,
 )
-from api.utils.base62 import decode_base62, encode_base62
+from api.utils.base62 import decode_base62
 from recipes.models import (
     Favorite,
     Ingredient,
